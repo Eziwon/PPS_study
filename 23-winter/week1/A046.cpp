@@ -2,32 +2,28 @@
 // 문제: 1159. 농구 경기
 
 #include <iostream>
-#include <vector>
 using namespace std;
 
 int main() {
     int N;
     cin >> N;
-    cin.ignore();
-    vector<string> ans(N);
+    int count[26] = {};
     
     for (int i = 0; i < N; i++) {
-        getline(cin, ans[i]);
+        string name;
+        cin >> name;
+        count[name[0] - 'a']++;
     }
     
-    for (int i = 0; i < N; i++) {
-        int score = 1;
-        int total = 0;
-        for (char ch : ans[i]) {
-            if (ch == 'X') {
-                score = 0;
-            }
-            total += score;
-            score++;
+    int predaja = 1;
+    for (int i = 0; i < 26; i++) {
+        if (count[i] >= 5) {
+            cout << (char)(i + 'a');
+            predaja = 0;
         }
-        
-        cout << total << endl;
     }
+    
+    if (predaja) cout << "PREDAJA" << endl;
     
     return 0;
 }
