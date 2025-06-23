@@ -16,6 +16,7 @@
 using namespace std;
 
 int main() {
+    // 아래의 3줄은 시간 초과 문제 해결을 위함
     ios::sync_with_stdio(false);
     cin.tie(NULL);
     cout.tie(NULL);
@@ -44,7 +45,8 @@ int main() {
             max_heap.push(min_val);
             min_heap.push(max_val);
         }
-        cout << max_heap.top() << '\n';
+
+        cout << max_heap.top() << '\n'; // endl -> '\n'로 시간초과 문제 해결
     }
 
     return 0;
