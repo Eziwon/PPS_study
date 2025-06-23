@@ -42,6 +42,8 @@ int main() {
         }
     }
 
+    printf("%d\n", dp[N][K]);
+    
     return 0;
 }
 
