@@ -18,7 +18,8 @@ using namespace std;
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(NULL);
-    
+    cout.tie(NULL);
+
     int N;
     cin >> N;
 
@@ -43,7 +44,7 @@ int main() {
             max_heap.push(min_val);
             min_heap.push(max_val);
         }
-        cout << max_heap.top() << endl;
+        cout << max_heap.top() << '\n';
     }
 
     return 0;
