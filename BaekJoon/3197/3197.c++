@@ -17,41 +17,115 @@
 // '.'은 물 공간, 'X'는 빙판 공간, 'L'은 백조가 있는 공간으로 나타낸다
 
 #include <iostream>
-#include <string>
+#include <queue>
 #include <vector>
 #include <algorithm>
-#include <queue>
 
 using namespace std;
 
 int R, C;
-vector<string> arr;
-bool isFind = false;
-pair<int, int> swan;
-queue<pair<int, int>> sq, wq, tmpSQ, tmpWQ;
+vector<string> lake;
+queue<pair<int, int> > waterQ, nextWaterQ;
+queue<pair<int, int> > swanQ, nextSwanQ;
+bool visited[1500][1500];
+pair<int, int> swans[2];
+
+int dy[4] = {-1, 1, 0, 0};
+int dx[4] = {0, 0, -1, 1};
+
+bool canMeet() {
+    while(!swanQ.empty()) {
+        int y = swanQ.front().first;
+        int x = swanQ.front().second;
+        swanQ.pop();
+
+        for (int d = 0; d < 4; ++d) {
+            int ny = y + dy[d];
+            int nx = x + dx[d];
+
+            if (ny < 0 || ny >= R || nx < 0 || nx >= C) continue;
+            if (visited[ny][nx]) continue;
+
+            visited[ny][nx] = true;
+            if(lake[ny][nx] == '.') {
+                swanQ.push(make_pair(ny, nx));
+            } else if (lake[ny][nx] == 'X') {
+                nextSwanQ.push(make_pair(ny, nx));
+            } else if (lake[ny][nx] == 'L') {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+void meltIce() {
+    while (!waterQ.empty()) {
+        int y = waterQ.front().first;
+        int x = waterQ.front().second;
+        waterQ.pop();
+
+        for (int d = 0; d < 4; ++d) {
+            int ny = y + dy[d];
+            int nx = x + dx[d];
+
+            if (ny < 0 || ny >= R || nx < 0 || nx >= C) continue;;
+
+            if (lake[ny][nx] == 'X') {
+                lake[ny][nx] = '.';
+                nextWaterQ.push(make_pair(ny, nx));
+            }
+        }
+    }
+}
 
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(NULL);
 
     cin >> R >> C;
+    lake.resize(R);
+
+    int swanCount = 0;
 
     for (int i = 0; i < R; i++) {
-        string str;
-        cin >> str;
-        arr.push_back(str);
-    }
-    for (int i = 0; i < R; i++) {
-        for (int j = 0; j < arr[i].size(); j++) {
-            if (arr[i][j] == 'L') {
-                swan.first = i;
-                swan.second = j;
+        cin >> lake[i];
+        for (int j = 0; j < C; j++) {
+            if (lake[i][j] == 'L') {
+                if (swanCount == 0) {
+                    swans[0] = make_pair(i, j);
+                } else {
+                    swans[1] = make_pair(i, j);
+                }
+                lake[i][j] = '.';
+                swanCount++;
             }
-            if (arr[i][j] != 'X') {
-                
+
+            if (lake[i][j] == '.') {
+                waterQ.push(make_pair(i, j));
             }
         }
     }
+    
+    swanQ.push(swans[0]);
+    visited[swans[0].first][swans[0].second] = true;
+
+    int days = 0;
+    while(true) {
+        if (canMeet()) break;
+        meltIce();
+
+        swanQ = nextSwanQ;
+        waterQ = nextWaterQ;
+
+        while(!nextSwanQ.empty()) nextSwanQ.pop();
+        while(!nextWaterQ.empty()) nextWaterQ.pop();
+
+        days++;
+    }
+
+    cout << days << '\n';
 
     return 0;
 }
