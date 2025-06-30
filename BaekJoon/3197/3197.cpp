@@ -17,6 +17,7 @@
 // '.'은 물 공간, 'X'는 빙판 공간, 'L'은 백조가 있는 공간으로 나타낸다
 
 #include <iostream>
+#include <vector>
 #include <queue>
 using namespace std;
 
@@ -24,7 +25,7 @@ using namespace std;
 
 bool isFind;
 int R, C;
-char MAP[MAX][MAX];
+vector<string> MAP;
 
 queue<pair<int, int>> waterQ, waterNQ;
 queue<pair<int, int>> swanQ, swanNQ;
@@ -34,8 +35,8 @@ bool Visit[MAX][MAX];
 int dx[] = {0, 0, 1, -1};
 int dy[] = {1, -1, 0, 0};
 
-void swanBFS() {
-    while (!swanQ.empty() && !isFind) {
+bool swanBFS() {
+    while (!swanQ.empty()) {
         int x = swanQ.front().first;
         int y = swanQ.front().second;
         swanQ.pop();
@@ -48,16 +49,17 @@ void swanBFS() {
             if (Visit[nx][ny]) continue;
 
             Visit[nx][ny] = true;
-            if (MAP[nx][ny] == '.') {
+            if (MAP[nx][ny] == '.') {   // 주변이 물인 경우
                 swanQ.push(make_pair(nx, ny));
-            } else if (MAP[nx][ny] == 'X') {
+            } else if (MAP[nx][ny] == 'X') {    // 주변이 얼음인 경우 -> 다음 날에 녹음
                 swanNQ.push(make_pair(nx, ny));
-            } else if (MAP[nx][ny] == 'L') {
-                isFind = true;
-                break;
+            } else if (MAP[nx][ny] == 'L') {    // 주변에 백조가 있는 경우 -> 백조를 찾음!
+                return true;
             }
         }
     }
+
+    return false;
 }
 
 void waterBFS() {
@@ -71,7 +73,7 @@ void waterBFS() {
             int ny = y + dy[i];
 
             if (nx >= 0 && ny >= 0 && nx < R && ny < C) {
-                if (MAP[nx][ny] == 'X') {
+                if (MAP[nx][ny] == 'X') {   // 물 주변이 얼음인 경우 -> 녹임
                     MAP[nx][ny] = '.';
                     waterNQ.push(make_pair(nx, ny));
                 }
@@ -89,13 +91,15 @@ int main() {
     isFind = false;
     cin >> R >> C;
 
+    MAP.resize(R);
     int swanCount = 0;
 
+    // 호수 정보 입력받기
     for (int i = 0; i < R; i++) {
+        cin >> MAP[i];
         for (int j = 0; j < C; j++) {
-            cin >> MAP[i][j];
-            if (MAP[i][j] != 'X') waterQ.push(make_pair(i, j));
-            if (MAP[i][j] == 'L') {
+            if (MAP[i][j] != 'X') waterQ.push(make_pair(i, j)); // 얼음이 아닌 경우 (물 or 백조)
+            if (MAP[i][j] == 'L') { // 백조인 경우
                 if (swanCount == 0) {
                     swans[0].first = i;
                     swans[0].second = j;
@@ -113,18 +117,16 @@ int main() {
 
     int days = 0;
 
-    while (!isFind) {
-        swanBFS();
+    while (true) {
+        if (swanBFS()) break;   // 백조 이동해보기
 
-        if (!isFind) {
-            waterBFS();
-            waterQ = waterNQ;
-            swanQ = swanNQ;
+        waterBFS();     // 얼음 녹이기
+        waterQ = waterNQ;
+        swanQ = swanNQ;
 
-            while (!waterNQ.empty()) waterNQ.pop();
-            while (!swanNQ.empty()) swanNQ.pop();
-            days++;
-        }
+        while (!waterNQ.empty()) waterNQ.pop();
+        while (!swanNQ.empty()) swanNQ.pop();
+        days++; // 하루가 지남
     }
 
     cout << days << '\n';
